@@ -1,0 +1,136 @@
+# 200: "Success"
+# 301: "Moved permanently"
+
+BAD_REQUEST:
+  message: "Bad request"
+  code: 400
+
+REQUEST_TOO_LARGE:
+  message: "Request too large"
+  code: 413
+
+REQUEST_TOO_LONG:
+  message: "Requested uri too long"
+  code: 414
+
+UPGRADE_REQUIRED:
+  message: "Upgrade required"
+  code: 426
+
+TOO_MANY_REQUESTS:
+  message: "Too many requests"
+  code: 429
+
+INTERNAL_UNDEFINED:
+  message: 'Internal server error'
+  code: 500
+
+UNDEFINED_ROUTE:
+  message: "Route not found/implemented"
+  code: 501
+
+BAD_GATEWAY:
+  message: "Bad gateway"
+  code: 502
+
+SERVICE_UNAVAILABLE:
+  message: "Service Unavailable"
+  code: 503
+
+TIMEOUT:
+  message: "Gateway Timeout"
+  code: 504
+
+ROUTE_DEFINITION:
+  message: "Route expects method and route, `{GET|PUT|PATCH|DELETE} {PATH}`. Example: `GET /user/v1/:test`"
+  code: 500
+
+MIDDLEWARE_HANDLER:
+  message: "Could not load middleware handler (%s) At line `%s`"
+  code: 500
+
+UNDEFINED_ACCESS:
+  message: "Access (%s) not defined in `config/access.yaml`"
+  code: 500
+
+ACCESS_UNDEFINED_DRIVER:
+  message: "Access driver (%s) not found in `access`."
+  code: 500
+
+ACCESS_DRIVER_CONSTRUCTOR:
+  message: "Could not construct driver (%s). Reason: %s"
+  code: 500
+
+ACCESS_MIDDLEWARE:
+  message: "Access `middleware` definition required in `%s`"
+  code: 500
+
+VALIDATION_REQUIRE_VALUE:
+  message: "Validation requires value (%s)"
+  code: 500
+
+MIN_LENGTH_REQUIRED:
+  message: "Bad argument `%s` length. Required more than %n"
+  code: 500
+
+MAX_LENGTH_REQUIRED:
+  message: "Bad argument `%s` length. Required less than %n"
+  code: 500
+
+VALIDATION_REGEX_MISMATCH:
+  message: "Value (%s) is invalid"
+  code: 500
+
+MIDDLEWARE_RESULT:
+  message: "Expected a promise in middleware result"
+  code: 500
+
+MIDDLEWARE_EXCEPTION:
+  message: "Exception occured when processing middleware: %s"
+  code: 500
+
+REQUEST_BAD_FIELD:
+  message: "Request body includes undefined data (%s)"
+  code: 500
+
+BAD_AUTHORIZATION:
+  message: "Authorization missmatch"
+  code: 500
+
+UNDEFINED_STORAGE_DRIVER:
+  message: "Undefined storage driver (%n)"
+  code: 500
+
+BAD_YAML_FILE:
+  message: "Could not load YAML file `%s`. Reason: %s"
+  code: 500
+
+CACHE_DEFAULT_PUT:
+  message: "Default Cache.put(key, value, expires_in) function. Requires a overload in storage driver constructor!"
+  code: 500
+
+CACHE_DEFAULT_GET:
+  message: "Default Cache.get(key, value) function. Requires a overload in storage driver constructor!"
+  code: 500
+
+CACHE_DEFAULT_PATCH:
+  message: "Default Cache.patch(key, value) function. Requires a overload in storage driver constructor!"
+  code: 500
+
+CACHE_DEFAULT_INVALIDATE:
+  message: "Default Cache.invalidate(key) function. Requires a overload in storage driver constructor!"
+  code: 500
+
+CACHE_DEFAULT_EXPIRE:
+  message: "Default Cache.expire(key, expires_in) function. Requires a overload in storage driver constructor!"
+  code: 500
+
+CACHE_RESULT:
+  message: "Expected a Promise result from Cache.get in cache middleware"
+  code: 500
+
+VALIDATON_ERROR:
+  message: "Validation `%s` failed. Schema `%s`, %s"
+  code: 500
+
+# 512 - 597 Free codes for specific errors?

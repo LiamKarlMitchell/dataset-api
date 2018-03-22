@@ -1,0 +1,33 @@
+PUT /v1/user/:method:
+  middleware: /v1/user.create.js
+  fields: ['email', 'name', 'password', 'nametag', 'test']
+  validation:
+    schema: /v1/user.create.js
+    email:
+      required: true
+      match: test@gmail.com
+    name:
+      required: true
+    password:
+      required: true
+      length:
+        min: 4
+        max: 16
+  # access: default
+
+  # Server request settings cache
+  request:
+    cache:
+      enabled: true
+      ttl: 3600
+      driver: simple
+
+  # Destination headers settings cache
+  response:
+    cache:
+      enabled: true
+      ttl: 3600
+    headers:
+      cache-control: 'public, max-age=31557600'
+      pragma: 'no-cache'
+      expires: 0

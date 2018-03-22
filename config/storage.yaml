@@ -1,0 +1,2 @@
+simple:
+  driver: /storage/simple.cache.js

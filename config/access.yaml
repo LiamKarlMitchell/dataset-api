@@ -1,0 +1,6 @@
+default:
+  key: someadminkey01
+  driver: simple # We could have used also (default, bcrypt, SSL any other?)
+debug:
+  key: debug-key
+  driver: simple
