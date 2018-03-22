@@ -7,15 +7,6 @@ class Mysql extends Connection{
     super()
 
     this.agent = mysql.createPool(configuration)
-
-    this.client()
-    .then(connection => {
-      connection.release()
-      this.operator.emit('connect')
-    })
-    .catch((e) => {
-      this.operator.emit('error', e, true)
-    })
   }
 
   async client(){

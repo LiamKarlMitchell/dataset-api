@@ -6,21 +6,21 @@ module.exports.pre = async () => {
 }
 
 module.exports.middleware = async (request, response) => {
-  let connection = Connections.get('test')
-  let client = await connection.client()
-
-  console.log('test middleware')
-  console.log(request.params, request.query)
-
+  // let connection = Connections.get('test')
+  // let client = await connection.client()
+  //
+  // console.log('test middleware')
+  // console.log(request.params, request.query)
+  //
   let result = {
     blah: 'Maybe not as defined as schema?'
   }
-
-  client.release()
+  //
+  // client.release()
 
   return result
 }
 
 module.exports.post = async () => {
-  throw new Exceptions.BAD_REQUEST
+  // throw new Exceptions.BAD_REQUEST
 }
