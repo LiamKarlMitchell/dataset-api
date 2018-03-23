@@ -30,9 +30,9 @@ class Connections{
       return null
     }
 
-    if(!connection.connected){
-      throw new Error('Connection not established')
-    }
+    // if(!connection.connected){
+    //   throw new Error('Connection not established')
+    // }
 
     return connection
   }

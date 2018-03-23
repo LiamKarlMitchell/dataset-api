@@ -1,4 +1,5 @@
 const EventEmitter = require('events')
+const Exceptions = require('./exceptions')
 
 // TODO: Do extra logic here on events occured. Notice connection about it, it will be logged or prompted for critical update on situation.
 // NOTE: Note that this.connected is checked for connection, if false. No action will be performed with this connection :)
@@ -6,7 +7,7 @@ const EventEmitter = require('events')
 class Connection{
   constructor(){
     this.agent = null
-    this.connected = false
+    this.connected = false // TODO: Make connected a property.
     this.operator = new EventEmitter
 
     this.timedout_count = 0
@@ -37,7 +38,13 @@ class Connection{
         this.operator.emit('disconnect')
       }
     })
+
+    //connect()
   }
+// TODO: Implement connect as an async method so we can reconnect and also attempt connect on startup?
+  //async connect(){
+//    throw new Exceptions.CONNECTION_ERROR("Driver '" + this + "' should implement it's own connect method.")
+//  }
 
   async client(){
     console.log('default `get` for connection client')

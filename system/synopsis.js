@@ -51,7 +51,7 @@ class Synopsis{
 
       let [method, route_path] = definition
 
-      if(!['GET', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())){
+      if(!['GET', 'POST', 'PUT', 'DELETE', 'PATCH'].includes(method.toUpperCase())){
         throw new Exceptions.ROUTE_DEFINITION
       }
 
