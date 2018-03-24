@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bluebird": "^3.5.1",
     "body-parser": "^1.18.2",
     "decache": "^4.4.0",
     "express": "^4.16.2",
@@ -19,5 +20,10 @@
     "jsonschema": "^1.2.2",
     "mysql": "^2.15.0",
     "read": "^1.0.7"
+  },
+  "devDependencies": {
+    "mssql": "^4.1.0",
+    "pg-promise": "^8.2.2",
+    "promise-mysql": "^3.2.1"
   }
 }

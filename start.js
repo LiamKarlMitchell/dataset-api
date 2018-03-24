@@ -14,7 +14,7 @@ server.use(body_parser.urlencoded({ extended: false }))
 server.use(body_parser.json())
 
 server.use((request, response, next) => {
-  let type = request.headers['content-type']
+  let type = request.headers['content-type'] || 'application/json'
 
   if( type !== 'application/x-www-form-urlencoded' &&
       type !== 'application/json')
@@ -54,7 +54,7 @@ server.use((e, request, response, next) => {
   // {error: e.type, code: e.code, message: e.message}
   // One general error code, for things we are not able to track or define with the code?
 
-  // console.log(e, 'code :', e.code)
+  console.log(e, 'code :', e.code)
 
   if(e.code === undefined) e.code = 500
 
