@@ -46,7 +46,7 @@ ROUTE_DEFINITION:
   code: 500
 
 MIDDLEWARE_HANDLER:
-  message: "Could not load middleware handler (%s) At line `%s`"
+  message: "`%s` in middleware handler (%s), at line `%s`"
   code: 500
 
 UNDEFINED_ACCESS:
@@ -82,11 +82,15 @@ VALIDATION_REGEX_MISMATCH:
   code: 500
 
 MIDDLEWARE_RESULT:
-  message: "Expected a promise in middleware result"
+  message: "Expected a promise result in `%s`"
   code: 500
 
 MIDDLEWARE_EXCEPTION:
   message: "Exception occured when processing middleware: %s"
+  code: 500
+
+MIDDLEWARE_NOT_DEFINED:
+  message: "Middleware `%s` not defined or not AsyncFunction or Promise"
   code: 500
 
 REQUEST_BAD_FIELD:
@@ -98,7 +102,7 @@ BAD_AUTHORIZATION:
   code: 500
 
 UNDEFINED_STORAGE_DRIVER:
-  message: "Undefined storage driver (%n)"
+  message: "Undefined storage driver (%s)"
   code: 500
 
 BAD_YAML_FILE:
@@ -131,6 +135,22 @@ CACHE_RESULT:
 
 VALIDATON_ERROR:
   message: "Validation `%s` failed. Schema `%s`, %s"
+  code: 500
+
+ACCESS_EXCEPTION:
+  message: "Access exception: %s"
+  code: 500
+
+ROUTE_ACTION_REQUIRED:
+  message: "Route requires {QUERY|MIDDLEWARE} definition"
+  code: 500
+
+UNDEFINED_CONNECTION:
+  message: "Connection `%s` is undefined"
+  code: 500
+
+UNDEFINED_METHOD:
+  message: "Undefined %s in `%s`"
   code: 500
 
 # 512 - 597 Free codes for specific errors?

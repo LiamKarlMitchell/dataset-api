@@ -1,0 +1,170 @@
+
+  // constructor(){
+  //   this.router = express.Router()
+  //   this.document
+  //
+  //   this.reload()
+  // }
+  //
+  // reload(){
+  //   let router = express.Router()
+  //
+  //   let file = fs.readFileSync(path.resolve('./dataset/synopsis.yaml'))
+  //
+  //   try{
+  //     this.document = yaml.safeLoad(file, 'utf-8')
+  //   }catch(e){
+  //     throw new Exceptions.BAD_YAML_FILE(file, e.message)
+  //   }
+  //
+  //   for(let route in this.document){
+  //     let definition = route.split(' ')
+  //
+  //     for(let i=0; i<definition.length; i++){
+  //       if(definition[i].trim().length === 0){
+  //         definition.splice(i, 1)
+  //       }
+  //     }
+  //
+  //     if(definition.length !== 2){
+  //       throw new Exceptions.ROUTE_DEFINITION
+  //     }
+  //
+  //     let [method, route_path] = definition
+  //
+  //     if(!['GET', 'POST', 'PUT', 'DELETE', 'PATCH'].includes(method.toUpperCase())){
+  //       throw new Exceptions.ROUTE_DEFINITION
+  //     }
+  //
+  //     let entry = this.document[route]
+  //     let path_handler = path.join(ROOT_DIRECTORY, 'dataset', entry.middleware)
+  //
+  //     decache(path_handler)
+  //
+  //     let handler
+  //     try{
+  //       handler = require(path_handler)
+  //     }catch(e){
+  //       let stack = e.stack.split("\n")
+  //       let at = stack[1].match(/[0-9]+\:[0-9]+/)
+  //       let line = at === null ? 'Unknown' : at[0]
+  //
+  //       console.log(at, line)
+  //     }
+  //
+  //     let access = this.getAccess(entry)
+  //
+  //     let trip = []
+  //
+  //     trip.push((request, response, next) => access.middleware(request, response, next))
+
+  //
+  //     trip.push((request, response, next) => {
+
+  //
+  //       next()
+  //     })
+  //
+
+  //
+  //     trip.push((request, response, next) => {
+  //       let result = handler.middleware(request, response, next)
+  //
+  //       if(!result instanceof Promise && !result instanceof AsyncFunction){
+  //         throw new Exceptions.MIDDLEWARE_RESULT
+  //       }
+  //
+  //       result.then(result => {
+  //         request.result = result
+  //         next()
+  //       })
+  //       .catch(e => { throw new Exceptions.MIDDLEWARE_EXCEPTION(e.message) })
+  //       .catch(next)
+  //     })
+  //
+  //     trip.push((request, response, next) => {
+
+  //     })
+  //
+  //     let post_function = handler && handler.post ? handler.post : null
+  //
+  //     if(post_function instanceof Promise || post_function instanceof AsyncFunction){
+  //       trip.push((request, response, next) => {
+  //         post_function()
+  //         .then(() => { next() })
+  //         .catch(e => {
+  //           if(e.code === undefined){
+  //             throw new Exceptions.MIDDLEWARE_EXCEPTION(e.message)
+  //           }else{
+  //             throw e
+  //           }
+  //         })
+  //         .catch(next)
+  //       })
+  //     }
+  //
+  //     trip.push((request, response, next) => {
+
+  //     })
+  //
+  //     trip.push((request, response) => {
+  //       let [result, headers] = response.result
+  //
+  //       this.set(response, headers)
+  //
+  //       response.status(200).json(result)
+  //     })
+  //
+  //     let router_method = router[method.toLowerCase()]
+  //
+  //     for(let index in trip){
+  //       router_method.call(router, route_path, trip[index])
+  //     }
+  //   }
+  //
+  //   this.router = router
+  // }
+  //
+  // set(response, headers){
+  //   for(let header in Config.Default.headers){
+  //     response.set(this.normalizeHeader(header), Config.Default.headers[header])
+  //   }
+  //
+  //   for(let header in headers){
+  //     response.set(this.normalizeHeader(header), headers[header])
+  //   }
+  // }
+  //
+  // getAccess(entry){
+  //   if(!entry.access) return {
+  //     middleware: (request, response, next) => next()
+  //   }
+  //
+  //   let access = Config.Access[entry.access]
+  //
+  //   if(access === undefined){
+  //     throw new Exceptions.UNDEFINED_ACCESS(entry.access)
+  //   }
+  //
+  //   let driver_path = path.join(ROOT_DIRECTORY, 'access', access.driver)
+  //
+  //   let driver
+  //   try{
+  //     driver = require(driver_path)
+  //   }catch(e){
+  //     throw new Exceptions.ACCESS_UNDEFINED_DRIVER(access.driver)
+  //   }
+  //
+  //   let result
+  //   try{
+  //     result = new driver(access)
+  //   }catch(e){
+  //     throw new Exceptions.ACCESS_DRIVER_CONSTRUCTOR(access.driver, e.message)
+  //   }
+  //
+  //   if(result.middleware === undefined){
+  //     throw new Exceptions.ACCESS_MIDDLEWARE(path.join('access', access.driver))
+  //   }
+  //
+  //   return result
+  // }

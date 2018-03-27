@@ -41,15 +41,21 @@ class Connection{
 
     //connect()
   }
+
 // TODO: Implement connect as an async method so we can reconnect and also attempt connect on startup?
   //async connect(){
 //    throw new Exceptions.CONNECTION_ERROR("Driver '" + this + "' should implement it's own connect method.")
 //  }
 
   async client(){
-    console.log('default `get` for connection client')
+    throw new Exceptions.UNDEFINED_METHOD('`async` connection.client(script, variables)', __filename.replace(process.cwd(), ''))
+  }
 
-    return null
+  /*
+  Used to execute query files, without middleware.
+   */
+  async execute(script, variables){
+    throw new Exceptions.UNDEFINED_METHOD('`async` connection.execute(script, variables)', __filename.replace(process.cwd(), ''))
   }
 }
 

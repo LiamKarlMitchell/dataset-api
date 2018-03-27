@@ -1,42 +1,42 @@
-const path = require('path')
-const fs = require('fs')
-const yaml = require('js-yaml')
 const express = require('express')
+const fs = require('fs')
+const path = require('path')
+const yaml = require('js-yaml')
 const decache = require('decache')
+
+const Access = require('./access.js')
 const Storage = require('./storage.js')
 const Exceptions = require('./exceptions.js')
-
-const AsyncFunction = (async () => {}).constructor
-
-const Config = {
-  Access: yaml.safeLoad(fs.readFileSync(path.resolve('./config/access.yaml'), 'utf-8')),
-  Default: yaml.safeLoad(fs.readFileSync(path.resolve('./config/default.yaml'), 'utf-8')),
-}
+const Connections = require('./connections.js')
+const Validator = new (require('jsonschema').Validator)
+const Util = require('./util.js')
 
 const ROOT_DIRECTORY = process.cwd()
 
-const Validator = new (require('jsonschema').Validator)
+const Config = {
+  default: yaml.safeLoad(fs.readFileSync(path.resolve('./config/default.yaml'), 'utf-8'))
+}
 
 class Synopsis{
-  constructor(){
-    this.router = express.Router()
-    this.document
-
-    this.reload()
-  }
-
-  reload(){
-    let router = express.Router()
-
-    let file = fs.readFileSync(path.resolve('./dataset/synopsis.yaml'))
+  constructor(directory, version){
+    this.router
+    this.version = version
+    this.directory = directory
+    this.document_path = path.join(this.directory, 'synopsis.yaml')
 
     try{
-      this.document = yaml.safeLoad(file, 'utf-8')
+      this.synopsis = yaml.safeLoad(fs.readFileSync(this.document_path), 'utf-8')
     }catch(e){
       throw new Exceptions.BAD_YAML_FILE(file, e.message)
     }
 
-    for(let route in this.document){
+    this.setup()
+  }
+
+  setup(){
+    let reloaded_router = express.Router()
+
+    for(let route in this.synopsis){
       let definition = route.split(' ')
 
       for(let i=0; i<definition.length; i++){
@@ -55,261 +55,364 @@ class Synopsis{
         throw new Exceptions.ROUTE_DEFINITION
       }
 
-      let entry = this.document[route]
-      let path_handler = path.join(ROOT_DIRECTORY, 'dataset', entry.middleware)
+      let entry = this.synopsis[route]
+      let router = express.Router()
 
-      decache(path_handler)
 
-      let handler
-      try{
-        handler = require(path_handler)
-      }catch(e){
-        let stack = e.stack.split("\n")
-        let at = stack[1].match(/[0-9]+\:[0-9]+/)
-        let line = at === null ? 'Unknown' : at[0]
+      if(entry === null || entry === undefined) throw new Exceptions.ROUTE_ACTION_REQUIRED
+
+
+      /*
+      Cache middleware setup with request cache settings.
+      */
+
+      this.setup_cache(router, (entry.request && entry.request.cache) ? entry.request.cache : null)
+
+
+      /*
+      Access middleware setup for route entry.
+      */
+
+      this.setup_access(router, entry)
+
+
+      /*
+      Validation settings for input body.
+       */
+
+      this.setup_validation(router, entry.validation)
+
+
+      /*
+      Switch between setuping simple storage query or more advanced
+      middleware setup with pre and post functions.
+      Otherwise if none of above found, it will raise exception to define
+      one of them. As action on route is required (no empty routes).
+
+      Middleware optionally offers pre and post async functions.
+       */
+
+      if(entry.query){
+        this.setup_query(router, entry.query)
+      }else if(entry.middleware){
+        this.setup_middleware(router, entry.middleware)
+      }else{
+        throw new Exceptions.ROUTE_ACTION_REQUIRED
       }
 
-      let access = this.getAccess(entry)
 
-      let trip = []
+      /*
+      In setup response we are storing the cache if needed and applying headers.
+       */
 
-      trip.push((request, response, next) => access.middleware(request, response, next))
+      /*
+      In response, we are checking for response.result, if found, we send it with headers.
+      Otherwise we raise an error.
+      Headers are set in setup response. So the response is good to go.
+       */
 
-      if(entry.request && entry.request.cache && entry.request.cache.enabled){
-        let cache = entry.request.cache
+      this.setup_response(router, entry.response)
 
-        trip.push((request, response, next) => {
-          let driver = Storage.get(cache.driver)
-          let entry = driver.get(request.url)
+      /*
+      Final response. Applies headers from response.result if found.
+      Otherwise there must be a request.result in it.
+       */
 
-          if(!entry instanceof Promise && !entry instanceof AsyncFunction){
-            throw new Exceptions.CACHE_RESULT
-          }
+      router.use((request, response, next) => {
+        let result, headers = null
+        if(Array.isArray(response.result)){
+          [result, headers] = response.result
+        }else{
+          result = request.result
+        }
 
-          entry.then(cache => {
-            if(!cache) return next()
+        for(let header in Config.default.headers){
+          response.set(Util.normalize(header), Config.default.headers[header])
+        }
 
-            let [result, headers] = cache
+        for(let header in headers){
+          response.set(Util.normalize(header), headers[header])
+        }
 
-            this.set(response, headers)
+        response.status(200).json(result)
+      })
 
-            return response.status(200).json(result)
-          })
-          .catch(e => { throw new Exceptions.MIDDLEWARE_EXCEPTION(e.message) })
-          .catch(next)
-        })
+      reloaded_router[method.toLowerCase()].call(reloaded_router, route_path, router)
+    }
+
+    this.router = reloaded_router
+  }
+
+  setup_cache(router, cache){
+    if(cache === null || cache.enabled === false) return
+
+    router.use((request, response, next) => {
+      let driver = Storage.get(cache.driver)
+      let entry = driver.get(request.url)
+
+      if(!(entry instanceof Promise) && !(entry instanceof Util.AsyncFunction)){
+        throw new Exceptions.CACHE_RESULT
       }
 
-      trip.push((request, response, next) => {
-        if(entry.validation && entry.validation.schema) return next()
+      entry.then(cache => {
+        if(!cache) return next()
 
+        let [result, headers] = cache
+
+        for(let header in Config.default.headers){
+          response.set(Util.normalize(header), Config.default.headers[header])
+        }
+
+        for(let header in headers){
+          response.set(Util.normalize(header), headers[header])
+        }
+
+        return response.status(200).json(result)
+      })
+      .catch(e => { throw new Exceptions.MIDDLEWARE_EXCEPTION(e.message) })
+      .catch(next)
+    })
+  }
+
+  setup_access(router, entry){
+    router.use((request, response, next) => {
+      Access.for(entry)
+      .then(access => {
+        access.middleware(request, response, next)
+      })
+      .catch(e => {
+        throw new Exceptions.ACCESS_EXCEPTION(e.message)
+      })
+      .catch(e => next(e))
+    })
+  }
+
+  setup_validation(router, validation){
+    if(validation === null || validation === undefined) return
+
+    let type = typeof validation.schema
+
+    if(type === 'string'){
+      let validator_path = path.join(ROOT_DIRECTORY, 'schema', validation.schema)
+
+      router.use((request, response, next) => {
+        let schema
+        try{
+          schema = require(validator_path)
+        }catch(e){
+          // TODO: Throw better error
+        }
+
+        let result = Validator.validate(request.result, schema)
+
+        if(result.valid) return next()
+
+        let err = result.errors[0]
+        throw new Exceptions.VALIDATON_ERROR(validation.schema, (typeof err.schema === 'string' ? err.schema : 'unidentified'), err.message.replace(/\"/g, '\''))
+      })
+    }
+
+    if(type === 'object' || type === 'undefined'){
+      let fields = Object.keys(validation)
+
+      // TODO: Better validation place, and maintainability!
+
+      router.use((request, body, next) => {
         let data = request.body
         let values = []
 
-        if(entry.fields && entry.fields instanceof Array){
-          for(let name in data){
-            if(!entry.fields.includes(name)) {
-              throw new Exceptions.REQUEST_BAD_FIELD(name)
-            }
-
-            values.push(name)
+        for(let name in data){
+          if(!fields.includes(name)) {
+            throw new Exceptions.REQUEST_BAD_FIELD(name)
           }
+
+          values.push(name)
         }
 
-        if(entry.validation){
-          for(let name in entry.validation){
-            let validation = entry.validation[name]
+        for(let index in fields){
+          let field = fields[index]
+          let requirements = validation[field]
 
-            if(!validation) continue
+          if(requirements === null || requirements === undefined) continue
 
-            if(validation.required && !values.includes(name)){
-              throw new Exceptions.VALIDATION_REQUIRE_VALUE(name)
+          if(requirements.required && !values.includes(field)){
+            throw new Exceptions.VALIDATION_REQUIRE_VALUE(field)
+          }
+
+          let value = data[field]
+
+          if(value && requirements.length){
+            let min = requirements.length.min
+            let max = requirements.length.max
+            let length = value.length // TODO: Get that using the actual data type? If set. Default: string
+
+            if(typeof min === 'number' && min < length){
+              throw new Exceptions.MIN_LENGTH_REQUIRED(field, min)
             }
 
-            let value = data[name]
-
-            if(value && validation.length){
-              let min = validation.length.min
-              let max = validation.length.max
-              let length = value.length // TODO: Get that using the actual data type? If set. Default: string
-
-              if(typeof min === 'number' && min < length){
-                throw new Exceptions.MIN_LENGTH_REQUIRED(name, min)
-              }
-
-              if(typeof max === 'number' && max < length){
-                throw new Exceptions.MAX_LENGTH_REQUIRED(name, max)
-              }
+            if(typeof max === 'number' && max < length){
+              throw new Exceptions.MAX_LENGTH_REQUIRED(field, max)
             }
+          }
 
-            if(value && validation.match){
-              let regex = new RegExp(validation.match)
+          if(value && requirements.match){
+            let regex = new RegExp(requirements.match)
 
-              if(!regex.test(value)){
-                throw new Exceptions.VALIDATION_REGEX_MISMATCH(name)
-              }
+            if(!regex.test(value)){
+              throw new Exceptions.VALIDATION_REGEX_MISMATCH(field)
             }
           }
         }
 
         next()
       })
+    }
+  }
 
-      let pre_function = handler && handler.pre ? handler.pre : null
+  setup_middleware(router, p){
+    let middleware_path = path.join(this.directory, p)
 
-      if(pre_function instanceof Promise || pre_function instanceof AsyncFunction){
-        trip.push((request, response, next) => {
-          pre_function()
-          .then(() => { next() })
-          .catch(e => {
-            if(e.code === undefined){
-              throw new Exceptions.MIDDLEWARE_EXCEPTION(e.message)
-            }else{
-              throw e
-            }
-          })
-          .catch(next)
-        })
-      }
+    let handler
+    try{
+      handler = require(middleware_path)
+    }catch(e){
+      // TODO: Get line properly, from stack?
+      throw new Exceptions.MIDDLEWARE_HANDLER(e.message, handler_path, 'Unknown')
+    }
 
-      trip.push((request, response, next) => {
-        let result = handler.middleware(request, response, next)
+    if(!handler.middleware){
+      throw new Exceptions.MIDDLEWARE_NOT_DEFINED(path.join(this.version, p))
+    }
 
-        if(!result instanceof Promise && !result instanceof AsyncFunction){
-          throw new Exceptions.MIDDLEWARE_RESULT
+
+    /*
+    Using pre handler if defined
+     */
+
+    if(handler.pre){
+      router.use((request, response, next) => {
+        let result = handler.pre(request, response, next)
+
+        if((!result instanceof Promise) && (!result instanceof Util.AsyncFunction)){
+          throw new Exceptions.MIDDLEWARE_RESULT('handler.pre')
         }
 
-        result.then(result => {
-          request.result = result
+        result.then(() => next())
+        .catch(e => {
+          if(e.code === undefined){
+            throw new Exceptions.MIDDLEWARE_EXCEPTION(e.message)
+          }else{
+            throw e
+          }
+        })
+        .catch(next)
+      })
+    }
+
+
+    /*
+    Using middleware
+     */
+
+    router.use((request, response, next) => {
+      let result = handler.middleware(request, response, next)
+
+      if(!(result instanceof Promise) && !(result instanceof Util.AsyncFunction)){
+        throw new Exceptions.MIDDLEWARE_RESULT('handler.middleware')
+      }
+
+      result.then(result => {
+        request.result = result
+        next()
+      })
+      .catch(e => {
+        if(e.code === undefined){
+          throw new Exceptions.MIDDLEWARE_EXCEPTION(e.message)
+        }else{
+          throw e
+        }
+      })
+      .catch(next)
+    })
+
+
+    /*
+    Using post handler if defined
+     */
+
+    if(handler.post){
+      router.use((request, response, next) => {
+        let result = handler.post(request, response, next)
+
+        if(!(result instanceof Promise) && !(result instanceof Util.AsyncFunction)){
+          throw new Exceptions.MIDDLEWARE_RESULT('handler.post')
+        }
+
+        result.then(() => next())
+        .catch(e => {
+          if(e.code === undefined){
+            throw new Exceptions.MIDDLEWARE_EXCEPTION(e.message)
+          }else{
+            throw e
+          }
+        })
+        .catch(next)
+      })
+    }
+  }
+
+  setup_query(router, query){
+    let script = path.join(this.directory, query.script)
+
+    router.use((request, response, next) => {
+      let connection = Connections.get(query.connection)
+
+      let result = connection.execute(script, {
+        query: request.query,
+        param: request.params,
+        form: request.body
+      })
+
+      if(!(result instanceof Promise) && !(result instanceof Util.AsyncFunction)){
+        throw new Exceptions.MIDDLEWARE_RESULT('connection.execute')
+      }
+
+      result.then(result => {
+        request.result = result
+        next()
+      })
+      .catch(e => {
+        if(e.code === undefined){
+          throw new Exceptions.MIDDLEWARE_EXCEPTION(e.message)
+        }else{
+          throw e
+        }
+      })
+      .catch(next)
+    })
+  }
+
+  setup_response(router, option = null){
+    if(option === null) return
+
+    router.use((request, response, next) => {
+      if(option.cache && option.cache.enabled){
+        let driver = Storage.get(option.cache.driver)
+
+        let cached_response = [request.result, option.headers]
+
+        driver.put(request.url, cached_response, option.cache.ttl)
+        .then(result => {
+          response.result = result
           next()
         })
         .catch(e => { throw new Exceptions.MIDDLEWARE_EXCEPTION(e.message) })
         .catch(next)
-      })
-
-      trip.push((request, response, next) => {
-        if(!entry.validation || !entry.validation.schema) return next()
-
-        let validator_path = path.join(ROOT_DIRECTORY, 'schema', entry.validation.schema)
-
-        let schema = require(validator_path)
-        let result = Validator.validate(request.result, schema)
-
-        if(result.valid) return next()
-
-        let err = result.errors[0]
-        throw new Exceptions.VALIDATON_ERROR(entry.validation.schema, (typeof err.schema === 'string' ? err.schema : 'unidentified'), err.message.replace(/\"/g, '\''))
-      })
-
-      let post_function = handler && handler.post ? handler.post : null
-
-      if(post_function instanceof Promise || post_function instanceof AsyncFunction){
-        trip.push((request, response, next) => {
-          post_function()
-          .then(() => { next() })
-          .catch(e => {
-            if(e.code === undefined){
-              throw new Exceptions.MIDDLEWARE_EXCEPTION(e.message)
-            }else{
-              throw e
-            }
-          })
-          .catch(next)
-        })
+      }else{
+        response.result = [request.result, option.headers]
       }
-
-      trip.push((request, response, next) => {
-        // TODO: Set cache headers if needed, etc.
-        // TODO: Cache the response sent, for reconstruction in this middleware.
-
-        let headers = entry.response && entry.response.headers ? entry.response.headers : null
-
-        if(entry.request && entry.request.cache && entry.request.cache.enabled){
-          let cache = entry.request.cache
-          let driver = Storage.get(cache.driver)
-
-          let cached_response = [request.result, headers]
-
-          driver.put(request.url, cached_response, cache.ttl)
-          .then(result => {
-            response.result = result
-            next()
-          })
-          .catch(e => { throw new Exceptions.MIDDLEWARE_EXCEPTION(e.message) })
-          .catch(next)
-        }else{
-          response.result = [request.result, headers]
-          next()
-        }
-      })
-
-      trip.push((request, response) => {
-        let [result, headers] = response.result
-
-        this.set(response, headers)
-
-        response.status(200).json(result)
-      })
-
-      let router_method = router[method.toLowerCase()]
-
-      for(let index in trip){
-        router_method.call(router, route_path, trip[index])
-      }
-    }
-
-    this.router = router
-  }
-
-  set(response, headers){
-    for(let header in Config.Default.headers){
-      response.set(this.normalizeHeader(header), Config.Default.headers[header])
-    }
-
-    for(let header in headers){
-      response.set(this.normalizeHeader(header), headers[header])
-    }
-  }
-
-  getAccess(entry){
-    if(!entry.access) return {
-      middleware: (request, response, next) => next()
-    }
-
-    let access = Config.Access[entry.access]
-
-    if(access === undefined){
-      throw new Exceptions.UNDEFINED_ACCESS(entry.access)
-    }
-
-    let driver_path = path.join(ROOT_DIRECTORY, 'access', access.driver)
-
-    let driver
-    try{
-      driver = require(driver_path)
-    }catch(e){
-      throw new Exceptions.ACCESS_UNDEFINED_DRIVER(access.driver)
-    }
-
-    let result
-    try{
-      result = new driver(access)
-    }catch(e){
-      throw new Exceptions.ACCESS_DRIVER_CONSTRUCTOR(access.driver, e.message)
-    }
-
-    if(result.middleware === undefined){
-      throw new Exceptions.ACCESS_MIDDLEWARE(path.join('access', access.driver))
-    }
-
-    return result
-  }
-
-  normalizeHeader(name){
-    let parts = name.split('-')
-    for(let i in parts){ parts[i] = parts[i].charAt(0).toUpperCase() + parts[i].slice(1) }
-    return parts.join('-')
+    })
   }
 }
 
-module.exports = new Synopsis
+module.exports = Synopsis

@@ -1,7 +1,7 @@
-# test:
-#   driver: mysql
-#   connectionLimit: 10
-#   host: 'localhost'
-#   user: 'root'
-#   password: ''
-#   database: 'database1'
+test:
+  driver: mysql
+  connectionLimit: 10
+  host: 'localhost'
+  user: 'root'
+  password: ''
+  database: 'database'

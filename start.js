@@ -1,5 +1,6 @@
-const Synopsis = require('./system/synopsis.js')
+// const Synopsis = require('./system/synopsis.js')
 const express = require('express')
+const fs = require('fs')
 
 const Connections = require('./system/connections.js')
 const Exceptions = require('./system/exceptions.js')
@@ -7,6 +8,10 @@ const Exceptions = require('./system/exceptions.js')
 const server = express()
 
 const body_parser = require('body-parser')
+
+const Logger = require('./system/logger.js')
+const Versioning = require('./system/versioning.js')
+const Cli = require('./system/cli.js')
 
 server.disable('x-powered-by')
 
@@ -25,25 +30,11 @@ server.use((request, response, next) => {
   next()
 })
 
-let router = express.Router()
+// TODO: Add access middleware to Cli.
+Cli.setup(server)
 
-// TODO: Add router CLI with access middleware.
+Versioning.setup(server)
 
-// router.get('/reload/:item', (request, response) => {
-//   try{
-//     Synopsis.reload()
-//   }catch(e){
-//     return response.status(500).json({error: e.message})
-//   }
-//
-//   response.status(200).json({error: null})
-// })
-
-server.use('/cli', router)
-
-server.use('/api', (req, res, next) => {
-  Synopsis.router(req, res, next)
-})
 
 server.use((e, request, response, next) => {
   // TODO: 3 types of error responses.
@@ -54,7 +45,8 @@ server.use((e, request, response, next) => {
   // {error: e.type, code: e.code, message: e.message}
   // One general error code, for things we are not able to track or define with the code?
 
-  console.log(e, 'code :', e.code)
+  Logger.error(e.message)
+  Logger.trace(e.stack)
 
   if(e.code === undefined) e.code = 500
 
@@ -62,6 +54,5 @@ server.use((e, request, response, next) => {
 })
 
 server.listen(8080, () => {
-  // console.log('%s listening at %s', server.name, server.url)
-  console.log('Server listetning at 8080 port')
+  Logger.log('Server listetning at 8080 port')
 })

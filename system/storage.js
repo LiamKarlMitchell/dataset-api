@@ -5,6 +5,10 @@ const Exceptions = require('./exceptions.js')
 
 const ROOT_DIRECTORY = process.cwd()
 
+const Config = {
+  default: yaml.safeLoad(fs.readFileSync('./config/default.yaml', 'utf-8'))
+}
+
 class Storage{
   constructor(){
     this.table = {}
@@ -22,7 +26,7 @@ class Storage{
     }
   }
 
-  get(name){
+  get(name = Config.default.storage){
     let driver = this.table[name]
 
     if(driver === undefined) throw new Exceptions.UNDEFINED_STORAGE_DRIVER(name)
