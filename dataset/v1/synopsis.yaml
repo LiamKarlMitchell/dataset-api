@@ -35,3 +35,5 @@ GET /user/:method:
 
 GET /user2:
   middleware: /user.create.js
+  validation:
+    schema: /v1/user.create.js
