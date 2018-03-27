@@ -195,11 +195,7 @@ class Synopsis{
     if(type === 'string'){
       let validator_path = path.join(ROOT_DIRECTORY, 'schema', validation.schema)
 
-      console.log('using schema')
-
       router.use((request, response, next) => {
-        console.log('schema validate')
-
         let schema
         try{
           schema = require(validator_path)

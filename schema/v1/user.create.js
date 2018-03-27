@@ -9,5 +9,5 @@ module.exports = {
     "votes": {"type": "integer", "minimum": 1}
   },
 
-  "required": ["name", "votes"]
+  // "required": ["name", "votes"]
 }
