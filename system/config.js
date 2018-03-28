@@ -32,6 +32,8 @@ class Config{
 
     paths[p.name] = p
 
+    // TODO: Add supported table of extensions and their handler
+
     try{
       let configuration = this[p.name] = yaml.safeLoad(fs.readFileSync(destination, 'utf-8'), 'utf-8')
     }catch(e){
