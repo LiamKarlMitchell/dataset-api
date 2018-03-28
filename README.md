@@ -248,13 +248,13 @@ Logger.fatal('Hey, its my `fatal` function')
 
 ## Create own Logger driver
 
-Create `mylogger`.js in `logger` directory. Export class with `module.exports` and make sure to override interface `system/logger.js` functions! Otherwise it will throw exception error.
+Create `mylogger`.js in `logger` directory. Export your extension class of Logger class with `module.exports` and make sure to override interface `system/logger.js` functions! Otherwise it will throw exception error.
 
 ```js
 const util = require('util')
 const Logger = require('../system/logger.js').class
 
-class Simple extends Logger{
+class MyLogger extends Logger{
   constructor(){
     super()
   }
@@ -284,7 +284,7 @@ class Simple extends Logger{
   }
 }
 
-module.exports = Simple
+module.exports = MyLogger
 ```
 
 ## Cloning
