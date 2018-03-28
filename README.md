@@ -230,6 +230,17 @@ GET /example/route:
   # ...
 ```
 
+## Using Logger
+
+Logger driver to use is defined in `config/default.yaml`.`logger`.`driver`.
+
+```js
+const Logger = require('../system/logger.js')
+
+Logger.log('Hey, its my log function')
+
+```
+
 ## Cloning
 
 Clone with working example routes (learning)
@@ -240,8 +251,20 @@ Or, clone it clean (advanced)
 
 `clone instructions here, to clone raw`
 
+## Feature list
+1. Supported `GET`, `POST`, `PATCH`, `DELETE`, `PUT` HTTP methods.
+2. SSL (coming soon)
+3. Any access driver (simple, oauth2, facebook, googleplus) or add your own
+4. Any storage driver (simple, redis) or add your own
+5. Any connection driver (mysql, postgres, mongo, mssql) or add your own
+6. Schema validation of form input
+7. Versioning of API's `v1`, `v2`, `v3` etc.
+8. Any logging driver (simple, pino, bunyan, winston) or add your own
+9. Cli, for helping out! And remote control using access driver (coming soon)
+
 ## Best practices
 
 1. Route method for purpose
+2.
 
 and some others, pretty sure we can add more here!
