@@ -28,7 +28,10 @@ build/Release
 node_modules
 
 schema/*
+!schema/.gitkeep
+
 dataset/*
+!dataset/.gitkeep
 
 config/access.yaml
 config/connection.yaml
