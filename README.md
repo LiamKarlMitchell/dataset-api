@@ -10,7 +10,8 @@ Create `synopsis.yaml` inside `dataset/{folder}`.
 ## Synopsis.yaml
 
 Synopsis describes your routes, validation and or middleware.
-Example
+
+Full example:
 ```yaml
 GET /user/create/sql:
   query:
@@ -55,8 +56,11 @@ GET /user/create/middleware:
 
 ## Creating simple sql query
 
-Create `query.sql` in your version `folder`
-Mention `query.sql` in your `synopsis.yaml` route.
+
+Create `query.sql` in your version `folder`.
+
+Mention `query.sql` in your `synopsis.yaml` route like this:
+
 
 ```yaml
 GET /example/route:
@@ -71,7 +75,9 @@ Open `config/connection.yaml` and add your connection.
 
 ```yaml
 yourconnection:
-  driver: mysql
+  driver: mysql # /connection/{driver}.js
+
+  # Driver specific settings:
   connectionLimit: 10
   host: 'localhost'
   user: 'root'
@@ -117,12 +123,13 @@ class Mydriver extends Connection{
 module.exports = Mydriver
 ```
 
-Constructor will then be created when initiating `Connections`
+Constructor will then be initiated using configuration from `config/connection.yaml` to `Connections`.
 
 
 ## Creating middleware
 
 Create `file.js` in your version `folder`.
+
 Mention `file.js` in your `synopsis.yaml` middleware.
 
 ```yaml
@@ -132,7 +139,7 @@ GET /example/route:
 
 ## Cloning
 
-Clone with working example routes ()
+Clone with working example routes (learning)
 
 `clone instruction here, to clone with example`
 
