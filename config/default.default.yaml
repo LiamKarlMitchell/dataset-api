@@ -2,8 +2,11 @@ headers:
   cache-control: 'no-cache, no-store, must-revalidate' # Http 1.1
   pragma: 'no-cache' # Http 1.0
   expires: 0 # Proxies
+
 logger:
   driver: simple
   debugging: true
-storage: simple.cache
+
+storage: simple
+
 connection: null

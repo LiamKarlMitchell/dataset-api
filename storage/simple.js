@@ -1,6 +1,6 @@
-const Cache = require('../system/cache.js')
+const Storage = require('../system/storage.js')
 
-class Simple extends Cache{
+class Simple extends Storage{
   constructor(configuration){
     super()
 

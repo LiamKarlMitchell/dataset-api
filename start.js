@@ -1,4 +1,11 @@
-// const Synopsis = require('./system/synopsis.js')
+const Config = require('./system/config.js')
+
+Config.load('access.yaml')
+Config.load('connection.yaml')
+Config.load('default.yaml')
+Config.load('storage.yaml')
+Config.load('virtualization.yaml')
+
 const express = require('express')
 const fs = require('fs')
 

@@ -19,6 +19,9 @@ class Versioning{
 
     for(let index in set){
       let version = set[index]
+
+      if(!fs.statSync(path.join(SET_PATH, version)).isDirectory()) continue
+
       let synopsis = this.list[version] = new Synopsis(path.join(SET_PATH, version), version)
 
       this.server.use('/api/' + version, (req, res, next) => {

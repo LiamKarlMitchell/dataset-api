@@ -5,7 +5,7 @@ const yaml = require('js-yaml')
 const decache = require('decache')
 
 const Access = require('./access.js')
-const Storage = require('./storage.js')
+const Storages = require('./storages.js')
 const Exceptions = require('./exceptions.js')
 const Connections = require('./connections.js')
 const Validator = new (require('jsonschema').Validator)
@@ -13,9 +13,7 @@ const Util = require('./util.js')
 
 const ROOT_DIRECTORY = process.cwd()
 
-const Config = {
-  default: yaml.safeLoad(fs.readFileSync(path.resolve('./config/default.yaml'), 'utf-8'))
-}
+const Config = require('./config.js')
 
 class Synopsis{
   constructor(directory, version){
@@ -27,7 +25,7 @@ class Synopsis{
     try{
       this.synopsis = yaml.safeLoad(fs.readFileSync(this.document_path), 'utf-8')
     }catch(e){
-      throw new Exceptions.BAD_YAML_FILE(file, e.message)
+      throw new Exceptions.BAD_YAML_FILE(this.document_path.replace(process.cwd(), ''), e.message)
     }
 
     this.setup()
@@ -148,7 +146,7 @@ class Synopsis{
     if(cache === null || cache.enabled === false) return
 
     router.use((request, response, next) => {
-      let driver = Storage.get(cache.driver)
+      let driver = Storages.get(cache.driver)
       let entry = driver.get(request.url)
 
       if(!(entry instanceof Promise) && !(entry instanceof Util.AsyncFunction)){
@@ -399,7 +397,7 @@ class Synopsis{
 
     router.use((request, response, next) => {
       if(option.cache && option.cache.enabled){
-        let driver = Storage.get(option.cache.driver)
+        let driver = Storages.get(option.cache.driver)
 
         let cached_response = [request.result, option.headers]
 

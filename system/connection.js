@@ -1,5 +1,5 @@
 const EventEmitter = require('events')
-const Exceptions = require('./exceptions')
+const Exceptions = require('./exceptions.js')
 
 // TODO: Do extra logic here on events occured. Notice connection about it, it will be logged or prompted for critical update on situation.
 // NOTE: Note that this.connected is checked for connection, if false. No action will be performed with this connection :)

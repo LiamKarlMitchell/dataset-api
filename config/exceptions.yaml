@@ -109,28 +109,28 @@ BAD_YAML_FILE:
   message: "Could not load YAML file `%s`. Reason: %s"
   code: 500
 
-CACHE_DEFAULT_PUT:
-  message: "Default Cache.put(key, value, expires_in) function. Requires a overload in storage driver constructor!"
+STORAGE_DEFAULT_PUT:
+  message: "Default Storage.put(key, value, expires_in) function. Requires a overload in storage driver constructor!"
   code: 500
 
-CACHE_DEFAULT_GET:
-  message: "Default Cache.get(key, value) function. Requires a overload in storage driver constructor!"
+STORAGE_DEFAULT_GET:
+  message: "Default Storage.get(key, value) function. Requires a overload in storage driver constructor!"
   code: 500
 
-CACHE_DEFAULT_PATCH:
-  message: "Default Cache.patch(key, value) function. Requires a overload in storage driver constructor!"
+STORAGE_DEFAULT_PATCH:
+  message: "Default Storage.patch(key, value) function. Requires a overload in storage driver constructor!"
   code: 500
 
-CACHE_DEFAULT_INVALIDATE:
-  message: "Default Cache.invalidate(key) function. Requires a overload in storage driver constructor!"
+STORAGE_DEFAULT_INVALIDATE:
+  message: "Default Storage.invalidate(key) function. Requires a overload in storage driver constructor!"
   code: 500
 
-CACHE_DEFAULT_EXPIRE:
-  message: "Default Cache.expire(key, expires_in) function. Requires a overload in storage driver constructor!"
+STORAGE_DEFAULT_EXPIRE:
+  message: "Default Storage.expire(key, expires_in) function. Requires a overload in storage driver constructor!"
   code: 500
 
 CACHE_RESULT:
-  message: "Expected a Promise result from Cache.get in cache middleware"
+  message: "Expected a Promise result from Storage.get in cache middleware"
   code: 500
 
 VALIDATON_ERROR:
@@ -151,6 +151,18 @@ UNDEFINED_CONNECTION:
 
 UNDEFINED_METHOD:
   message: "Undefined %s in `%s`"
+  code: 500
+
+MISSING_CONFIGURATION_FILE:
+  message: "Configuration file missing `%s`"
+  code: 500
+
+CONFIGURATION_FILE_EXCEPTION:
+  message: "Configuration (%s) exception `%s`"
+  code: 500
+
+DUPLICATED_CONFIGURATION:
+  message: "Duplicated configuration (%s) found `%s`"
   code: 500
 
 # 512 - 597 Free codes for specific errors?
