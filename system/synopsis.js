@@ -63,17 +63,17 @@ class Synopsis{
 
 
       /*
-      Cache middleware setup with request cache settings.
-      */
-
-      this.setup_cache(router, (entry.request && entry.request.cache) ? entry.request.cache : null)
-
-
-      /*
       Access middleware setup for route entry.
       */
 
       this.setup_access(router, entry)
+
+
+      /*
+      Cache middleware setup with request cache settings.
+      */
+
+      this.setup_cache(router, (entry.request && entry.request.cache) ? entry.request.cache : null)
 
 
       /*

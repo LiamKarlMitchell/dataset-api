@@ -6,7 +6,7 @@ const Exceptions = require('./exceptions')
 
 class Connection{
   constructor(){
-    this.agent = null
+    // this.agent = null
     this.connected = false // TODO: Make connected a property.
     this.operator = new EventEmitter
 

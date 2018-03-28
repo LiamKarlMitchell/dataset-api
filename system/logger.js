@@ -1,17 +1,18 @@
 const path = require('path')
 const yaml = require('js-yaml')
 const fs = require('fs')
+const Exceptions = require('./exceptions.js')
 
 class Logger{
   constructor(){
   }
 
-  log(){ throw new Error('Logger class, missing override `Logger.log`') }
-  debug(){ throw new Error('Logger class, missing override `Logger.debug`') }
-  trace(){ throw new Error('Logger class, missing override `Logger.trace`') }
-  warn(){ throw new Error('Logger class, missing override `Logger.warn`') }
-  error(){ throw new Error('Logger class, missing override `Logger.error`') }
-  fatal(){ throw new Error('Logger class, missing override `Logger.fatal`') }
+  log(){ throw new Exceptions.UNDEFINED_METHOD('override `Logger.log`', 'system/logger.js') }
+  debug(){ throw new Exceptions.UNDEFINED_METHOD('override `Logger.debug`', 'system/logger.js') }
+  trace(){ throw new Exceptions.UNDEFINED_METHOD('override `Logger.trace`', 'system/logger.js') }
+  warn(){ throw new Exceptions.UNDEFINED_METHOD('override `Logger.warn`', 'system/logger.js') }
+  error(){ throw new Exceptions.UNDEFINED_METHOD('override `Logger.error`', 'system/logger.js') }
+  fatal(){ throw new Exceptions.UNDEFINED_METHOD('override `Logger.fatal`', 'system/logger.js') }
 }
 
 module.exports.class = Logger
