@@ -5,5 +5,5 @@ headers:
 logger:
   driver: simple
   debugging: true
-storage: simple
-connection: test
+storage: simple.cache
+connection: null

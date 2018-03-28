@@ -35,7 +35,6 @@ Cli.setup(server)
 
 Versioning.setup(server)
 
-
 server.use((e, request, response, next) => {
   // TODO: 3 types of error responses.
   // INTERNAL_ERROR:

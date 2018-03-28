@@ -111,6 +111,7 @@ class Synopsis{
       Headers are set in setup response. So the response is good to go.
        */
 
+
       this.setup_response(router, entry.response)
 
       /*
