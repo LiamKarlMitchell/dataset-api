@@ -11,6 +11,10 @@ Create `synopsis.yaml` inside `dataset/{folder}`.
 
 Synopsis describes your routes, validation and or middleware. A route can have `simple query` or `middleware`. Query always comes first when checking.
 
+Everything is optional, apart from:
+
+`middleware` or `query`, one of them must be mentioned in route definition. Anything apart is just an example of what it is capable of.
+
 Full example:
 ```yaml
 GET /user/create/sql:
