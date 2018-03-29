@@ -191,7 +191,7 @@ class Mydriver extends Connection{
   }
 
   async client(){
-    return this.pool.request()
+    return mypool_or_connection.return_async_client()
   }
 
 }
@@ -311,6 +311,5 @@ Or, clone it clean (advanced)
 ## Best practices
 
 1. Route method for purpose
-2.
 
 and some others, pretty sure we can add more here!
