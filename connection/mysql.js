@@ -19,7 +19,7 @@ class Mysql extends Connection{
     this.pool.on('connection', (connection) => {
       // Note: We could use this for set options, and also if we need to set variables for user to use in triggers for modifiedby etc.
       //connection.query('SET SESSION auto_increment_increment=1')
-      
+
       // MySQL Specific PING server for keep-alive.
       // For long running queries you may want to ping. (Although I don't think anything should take 30 minutes too query who knows!)
       if (configuration.ping == true) {
@@ -67,6 +67,9 @@ class Mysql extends Connection{
     return this.pool.getConnection()
   }
 
+  async execute(script, variables){
+    return {}
+  }
 }
 
 module.exports = Mysql

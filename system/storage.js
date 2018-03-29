@@ -1,34 +1,13 @@
-const yaml = require('js-yaml')
-const path = require('path')
-const fs = require('fs')
 const Exceptions = require('./exceptions.js')
 
-const ROOT_DIRECTORY = process.cwd()
+class Cache{
+  constructor(){}
 
-class Storage{
-  constructor(){
-    this.table = {}
-    this.configuration = yaml.safeLoad(fs.readFileSync('./config/storage.yaml', 'utf-8'))
-    this.setup()
-  }
-
-  setup(){
-    for(let name in this.configuration){
-      let configuration = this.configuration[name]
-
-      let driver = require(path.join(ROOT_DIRECTORY, configuration.driver))
-
-      this.table[name] = new driver(configuration)
-    }
-  }
-
-  get(name){
-    let driver = this.table[name]
-
-    if(driver === undefined) throw new Exceptions.UNDEFINED_STORAGE_DRIVER(name)
-
-    return driver
-  }
+  async put(key, value, expires_in){ throw new Exceptions.STORAGE_DEFAULT_PUT }
+  async get(key, value){ throw new Exceptions.STORAGE_DEFAULT_GET }
+  async patch(key, value){ throw new Exceptions.STORAGE_DEFAULT_PATCH }
+  async invalidate(key){ throw new Exceptions.STORAGE_DEFAULT_INVALIDATE }
+  async expire(key, expires_in){ throw new Exceptions.STORAGE_DEFAULT_EXPIRE }
 }
 
-module.exports = new Storage
+module.exports = Cache
